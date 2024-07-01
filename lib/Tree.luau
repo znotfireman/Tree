@@ -1,14 +1,52 @@
 --!strict
 --!nolint LocalShadow
 
+--[[
+	Copyright (c) 2024 znotfireman
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to
+	deal in the Software without restriction, including without limitation the
+	rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+	sell copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+	IN THE SOFTWARE.
+]]
+
 export type Describer = (instance: Instance?) -> (boolean, string?)
 
+--[=[
+	Provides methods to create descriptions of Roblox instance trees, and use it
+	to validate other instances.
+
+	@class Tree
+]=]
 local Tree = {}
+
+local class_describer_cache: { [string]: Describer } = {}
+local is_a_describer_cache: { [string]: Describer } = {}
 
 local function get_property(instance: Instance, property: string): any
 	return (instance :: any)[property]
 end
 
+--[=[
+	Constructs and returns a describer given a description of an instance tree.
+	Call the returned describer to validate instances.
+
+	@param description -- The description of the instance tree.
+	@return function -- A describer of the instance tree. If failed, returns an error reason as the second return value.
+]=]
 function Tree.new(description: {
 	class_name: string?,
 	is_a: string?,
@@ -87,8 +125,19 @@ function Tree.new(description: {
 	end
 end
 
-function Tree.of_class(class_name: string): Describer
-	return function(instance: Instance?): (boolean, string?)
+--[=[
+	Constructs and returns a new describer that validates instances of the exact
+	class name.
+
+	@param class_name string -- The class name to validate with.
+	@return function -- A describer of the class name. If failed, returns an error reason as the second return value.
+]=]
+function Tree.class_of(class_name: string): Describer
+	local describer = class_describer_cache[class_name]
+	if describer then
+		return describer
+	end
+	local function describer(instance: Instance?): (boolean, string?)
 		if not instance then
 			return false, "Expected an instance, got nil"
 		end
@@ -97,10 +146,23 @@ function Tree.of_class(class_name: string): Describer
 		end
 		return true, nil
 	end
+	class_describer_cache[class_name] = describer
+	return describer
 end
 
+--[=[
+	Constructs and returns a new describer that validates instances which
+	inherits from the given class name.
+
+	@param class_name string -- The class name to validate with.
+	@return function -- A describer of the class name. If failed, returns an error reason as the second return value.
+]=]
 function Tree.which_is_a(class_name: string): Describer
-	return function(instance: Instance?): (boolean, string?)
+	local describer = is_a_describer_cache[class_name]
+	if describer then
+		return describer
+	end
+	local function describer(instance: Instance?): (boolean, string?)
 		if not instance then
 			return false, "Expected an instance, got nil"
 		end
@@ -109,8 +171,17 @@ function Tree.which_is_a(class_name: string): Describer
 		end
 		return true, nil
 	end
+	is_a_describer_cache[class_name] = describer
+	return describer
 end
 
+--[=[
+	Constructs and returns a new describer which passes if the instance is nil
+	or the inner describer passes.
+
+	@param inner_describer Describer -- The inner describer to validate with.
+	@return function -- An optional describer of the inner describer. If failed, returns an error reason as the second return value.
+]=]
 function Tree.optional(inner_describer: Describer): Describer
 	return function(instance: Instance?): (boolean, string?)
 		if not instance then

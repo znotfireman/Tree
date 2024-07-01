@@ -1,0 +1,12 @@
+[package]
+	name = "znotfireman/stellar"
+	description = "The evergreen way to describe Roblox instance trees and validate instances with."
+	license = "MIT"
+	authors = ["ImNotFireMan123"]
+	version = "0.1.0"
+
+	registry = "https://github.com/UpliftGames/wally-index"
+	realm = "shared"
+
+	exclude = ["**"]
+	include = ["lib", "lib/*", "default.project.json", "wally.toml"]
