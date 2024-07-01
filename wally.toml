@@ -1,5 +1,5 @@
 [package]
-	name = "znotfireman/stellar"
+	name = "znotfireman/tree"
 	description = "The evergreen way to describe Roblox instance trees and validate instances with."
 	license = "MIT"
 	authors = ["ImNotFireMan123"]
