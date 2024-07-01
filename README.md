@@ -1,11 +1,11 @@
 <img
-	src="./gh-assets/wordmark-dark.svg#gh-dark-mode-only"
-	alt="Tree"
-	width="250">
+    src="./gh-assets/wordmark-dark.svg#gh-dark-mode-only"
+    alt="Tree"
+    width="250">
 <img
-	src="./gh-assets/wordmark-light.svg#gh-light-mode-only"
-	alt="Tree"
-	width="250">
+    src="./gh-assets/wordmark-light.svg#gh-light-mode-only"
+    alt="Tree"
+    width="250">
 
 The evergreen way to describe Roblox instance trees and validate instances with.
 
@@ -92,12 +92,12 @@ message if it fails.
 
 ```lua
 function Tree.new(description: {
-	class_name: string?,
-	is_a: string?,
+    class_name: string?,
+    is_a: string?,
 
-	properties: { [string]: any }?,
-	children: { [string]: Describer }?,
-	attributes: { [string]: any }?,
+    properties: { [string]: any }?,
+    children: { [string]: Describer }?,
+    attributes: { [string]: any }?,
 }): Describer
 ```
 
